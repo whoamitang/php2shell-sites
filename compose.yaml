@@ -1,0 +1,48 @@
+name: php2shell-sites
+
+x-runtime: &runtime
+  platform: linux/amd64
+  read_only: true
+  restart: "no"
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+  cap_add: [CHOWN, SETUID, SETGID, NET_BIND_SERVICE, KILL]
+  mem_limit: 768m
+  memswap_limit: 768m
+  cpus: 1.0
+  pids_limit: 128
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,size=64m,mode=1777
+    - /var/run/apache2:rw,nosuid,nodev,size=1m,mode=755
+    - /var/lock/apache2:rw,nosuid,nodev,size=1m,mode=755
+
+services:
+  vulnerable:
+    <<: *runtime
+    build:
+      context: .
+      args:
+        PHP_IMAGE: php:8.4.26-apache@sha256:60111400ff77bdc44fa79b4f072afe49a42abba71e0846ad496be4761dc9c11a
+        EXPECTED_PHP: 8.4.26
+        EXPECTED_SOURCE_SHA256: 32a2de53862ad44ed4a5005244ce4f1b50c271e74dced215449a4443b40569f1
+    image: php2shell-sites-vulnerable:local
+    environment:
+      LAB_VARIANT: vulnerable
+    ports:
+      - "127.0.0.1:8080:80"
+
+  patched:
+    <<: *runtime
+    build:
+      context: .
+      args:
+        PHP_IMAGE: php:8.4.27-apache@sha256:a0b75cee7023ba2c127138dcad2ecc6ec7e09435534645e70450f29f24ea2a5a
+        EXPECTED_PHP: 8.4.27
+        EXPECTED_SOURCE_SHA256: dcf93923b0e38e0d5252b25b796520b5a47761a08b3488b6d0b5d1115764d3f0
+    image: php2shell-sites-patched:local
+    environment:
+      LAB_VARIANT: patched
+    ports:
+      - "127.0.0.1:8081:80"

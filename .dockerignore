@@ -1,0 +1,8 @@
+*
+!Dockerfile
+!docker/
+!docker/**
+!app/
+!app/**
+!public/
+!public/**
